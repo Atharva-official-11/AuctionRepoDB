@@ -1,0 +1,125 @@
+CREATE TABLE TblAssetPaymentMethod (
+    Id INT PRIMARY KEY,
+    Name NVARCHAR(100) NOT NULL
+);
+
+INSERT INTO TblAssetPaymentMethod (Id, Name) VALUES
+(1, 'Bank Transfer'),
+(2, 'Cheque'),
+(3, 'Credit Card'),
+(4, 'Apple Pay'),
+(5, 'Debit Card'),
+(6, 'Google Pay'),
+(7, 'PayPal');
+
+
+CREATE TABLE TblAssetCategoryStatus (
+    Id INT PRIMARY KEY,
+    Name NVARCHAR(50) NOT NULL
+);
+
+INSERT INTO TblAssetCategoryStatus (Id, Name) VALUES
+(1, 'Draft'),
+(2, 'Published');
+
+CREATE TABLE TblStatus (
+    Id INT PRIMARY KEY,
+    Name NVARCHAR(50) NOT NULL
+);
+
+INSERT INTO TblStatus (Id, Name) VALUES
+(1, 'Active'),
+(2, 'Inactive');
+
+
+CREATE TABLE TblAssetCategories (
+    Id INT PRIMARY KEY IDENTITY(1,1),
+    Title NVARCHAR(255) NOT NULL,
+    Subcategory NVARCHAR(255) NULL,
+    DepositPercentage DECIMAL(5,2) NOT NULL,
+    Details NVARCHAR(MAX) NOT NULL,
+    AdminFees DECIMAL(18,2) NULL,
+    AuctionFees DECIMAL(18,2) NULL,
+    BuyersCommission DECIMAL(18,2) NULL,
+    RegistrationDeadline INT NULL,
+    IconPath NVARCHAR(500) NOT NULL,
+    DocumentPath NVARCHAR(500) NOT NULL,
+    VAT NVARCHAR(50) NULL,
+    VATPercentage DECIMAL(5,2) NULL,
+    SortOrder INT NULL,
+
+    -- FK reference to status enum
+    StatusId INT NOT NULL,
+    FOREIGN KEY (StatusId) REFERENCES TblStatus(Id),
+
+    CreatedAt DATETIME2 DEFAULT GETDATE(),
+    UpdatedAt DATETIME2 DEFAULT GETDATE()
+);
+
+CREATE TABLE TblAssetCategoryPaymentMethod (
+    CategoryId INT NOT NULL,
+    PaymentMethodId INT NOT NULL,
+    PRIMARY KEY (CategoryId, PaymentMethodId),
+    FOREIGN KEY (CategoryId) REFERENCES TblAssetCategories(Id) ON DELETE CASCADE,
+    FOREIGN KEY (PaymentMethodId) REFERENCES TblAssetPaymentMethod(Id) ON DELETE CASCADE
+);
+
+
+
+
+
+-----------------------------------------------
+ALTER TABLE tblAssetCategories
+ADD Subcategory NVARCHAR(255) NULL;
+
+ALTER TABLE tblAssetCategories
+ADD DepositPercentage DECIMAL(5, 2) NOT NULL DEFAULT 0;
+
+ALTER TABLE tblAssetCategories
+ADD Details NVARCHAR(MAX) NULL;
+
+ALTER TABLE tblAssetCategories
+ADD AdminFees DECIMAL(18, 2) NOT NULL DEFAULT 0;
+
+ALTER TABLE tblAssetCategories
+ADD AuctionFees DECIMAL(18, 2) NOT NULL DEFAULT 0;
+
+ALTER TABLE tblAssetCategories
+ADD BuyerCommission DECIMAL(18, 2) NOT NULL DEFAULT 0;
+
+ALTER TABLE tblAssetCategories
+ADD RegistrationDeadline DATETIME NOT NULL DEFAULT GETDATE();
+
+ALTER TABLE tblAssetCategories
+ALTER COLUMN Icon NVARCHAR(255) NOT NULL;
+
+ALTER TABLE tblAssetCategories
+ADD VAT NVARCHAR(50) NULL;
+
+ALTER TABLE tblAssetCategories
+ADD VATPercentage DECIMAL(5, 2) NULL;
+
+ALTER TABLE tblAssetCategories
+ADD StatusId INT NOT NULL DEFAULT 1;
+
+ALTER TABLE tblAssetCategories
+ADD CreatedAt DATETIME DEFAULT GETDATE();
+
+ALTER TABLE tblAssetCategories
+ADD UpdatedAt DATETIME DEFAULT GETDATE();
+
+
+SELECT 
+    f.name AS ForeignKeyName,
+    COL_NAME(fc.parent_object_id, fc.parent_column_id) AS ColumnName,
+    OBJECT_NAME(f.referenced_object_id) AS ReferencedTable,
+    OBJECT_NAME(f.parent_object_id) AS TableWithFK
+FROM 
+    sys.foreign_keys AS f
+INNER JOIN 
+    sys.foreign_key_columns AS fc 
+    ON f.object_id = fc.constraint_object_id
+WHERE 
+    OBJECT_NAME(f.parent_object_id) = 'tblAssetCategories';
+
+select * from tblAssetCategories;
